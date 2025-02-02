@@ -2,10 +2,13 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Kelimebaz</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <meta name="theme-color" content="#6aaa64">
     <style>
         :root {
@@ -15,15 +18,31 @@
             --present-color: #c9b458;
             --absent-color: #787c7e;
         }
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        html {
+            height: -webkit-fill-available;
+            overscroll-behavior: none;
+        }
+        
         body {
-            font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
             margin: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             background-color: var(--bg-color);
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            overflow-y: auto;
+            overscroll-behavior-y: none;
         }
         .game-container {
             display: flex;
@@ -31,8 +50,11 @@
             align-items: center;
             width: 100%;
             max-width: 500px;
-            padding: 20px;
+            padding: 10px;
             position: relative;
+            margin: env(safe-area-inset-top) auto 0;
+            height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+            max-height: 844px;
         }
         h1 {
             color: #333;
@@ -50,15 +72,19 @@
             grid-template-columns: repeat(5, 1fr);
             gap: 5px;
             margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 350px;
         }
         .tile {
-            width: 62px;
-            height: 62px;
+            aspect-ratio: 1;
+            width: 100%;
             border: 2px solid var(--tile-border);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 32px;
+            font-size: min(32px, 6vw);
             font-weight: bold;
             text-transform: uppercase;
             transition: all 0.3s ease;
@@ -93,26 +119,36 @@
             align-items: center;
             width: 100%;
             max-width: 500px;
+            padding: 10px;
+            margin-top: auto;
+            box-sizing: border-box;
         }
         .keyboard-row {
             display: flex;
             justify-content: center;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: min(6px, 1vw);
+            margin-bottom: min(8px, 1.5vw);
             width: 100%;
+            touch-action: manipulation;
         }
         .key {
             background-color: #d3d6da;
             border: none;
             border-radius: 4px;
-            padding: 10px;
-            margin: 0 2px;
+            height: 52px;
+            margin: 0;
             cursor: pointer;
             text-transform: uppercase;
             font-weight: bold;
-            flex-grow: 1;
-            max-width: 46px;
+            font-size: min(18px, 4vw);
+            flex: 1;
+            max-width: 40px;
+            padding: 0;
             transition: background-color 0.2s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .key.wide {
             flex-grow: 1.5;
@@ -213,6 +249,60 @@
             0% { transform: rotateX(0); }
             50% { transform: rotateX(90deg); }
             100% { transform: rotateX(0); }
+        }
+
+        @media (max-height: 600px) {
+            .game-container {
+                padding: 5px;
+            }
+            .tile {
+                font-size: min(24px, 5vw);
+            }
+            .key {
+                height: 40px;
+                font-size: min(14px, 3.5vw);
+            }
+            .timer {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 20px;
+                padding: 5px;
+                height: auto;
+            }
+            #keyboard {
+                margin-top: 0;
+                max-width: 400px;
+            }
+            #grid {
+                margin-bottom: 0;
+            }
+            h1 {
+                width: 100%;
+                text-align: center;
+                margin: 5px 0;
+                font-size: 1.8rem;
+            }
+        }
+
+        @supports not (padding: env(safe-area-inset-top)) {
+            body {
+                padding: 0;
+            }
+            .game-container {
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
@@ -6313,7 +6403,6 @@
 "AYGIN",
 "UTMAK",
 "BAHAR",
-
         ];
 
         class KelimebazGame {
