@@ -1,10 +1,10 @@
 const CACHE_NAME = 'kelimebaz-v1';
 const ASSETS = [
-  '/oyun/',
-  '/oyun/index.html',
-  '/oyun/icon-192.png',
-  '/oyun/icon-512.png',
-  '/oyun/manifest.json'
+  './',
+  './index.html',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './manifest.json'
 ];
 
 self.addEventListener('install', event => {
