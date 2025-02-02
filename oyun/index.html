@@ -6,20 +6,116 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Kelimebaz</title>
-    <link rel="manifest" href="i/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="./icon.svg">
-    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <meta name="theme-color" content="#6aaa64">
-    <link rel="apple-touch-startup-image" href="./icons/icon-512.png" />
-    <meta name="apple-mobile-web-app-title" content="Kelimebaz">
     <style>
         :root {
-            --bg-color: #f0f0f0;
-            --tile-border: #d3d6da;
-            --correct-color: #6aaa64;
-            --present-color: #c9b458;
-            --absent-color: #787c7e;
+            --bg-color: #f5f7f5;
+            --tile-border: #c5d1c5;
+            --correct-color: #4c8c46;
+            --present-color: #b19f4c;
+            --absent-color: #3a3a3c;
+            --key-bg: #d4d6da;
+            --key-text: #1a1a1b;
+            --key-used: #818384;
+            --border-radius: 4px;
+            --keyboard-width: min(100%, 440px);
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            margin: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            background-color: var(--bg-color);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            max-width: 500px;
+            padding: 0 4px;
+            gap: 8px;
+        }
+
+        #keyboard {
+            width: var(--keyboard-width);
+            margin: auto 0 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+            padding: 0 2px;
+        }
+
+        .key {
+            background-color: var(--key-bg);
+            color: var(--key-text);
+            font-family: inherit;
+            font-weight: bold;
+            border: 0;
+            padding: 0;
+            border-radius: 4px;
+            height: 52px;
+            cursor: pointer;
+            text-transform: uppercase;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            line-height: 1;
+            transition: background-color 0.2s ease;
+        }
+
+        .key.wide {
+            flex: 1.5;
+            font-size: 12px;
+        }
+
+        @media (max-height: 600px) {
+            .key {
+                height: 42px;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .key {
+                height: 38px;
+            }
+        }
+
+        #message {
+            font-size: 14px;
+            text-align: center;
+            padding: 4px;
+            min-height: 24px;
+            color: var(--key-text);
+        }
+
         * {
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
@@ -50,13 +146,164 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
             width: 100%;
             max-width: 500px;
             padding: 10px;
             position: relative;
-            margin: env(safe-area-inset-top) auto 0;
-            height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-            max-height: 844px;
+            margin: 0 auto;
+            height: 100vh;
+            box-sizing: border-box;
+            gap: 10px;
+        }
+        
+        h1 {
+            color: var(--correct-color);
+            margin: 5px 0;
+            font-size: min(2.5rem, 8vw);
+            letter-spacing: 2px;
+        }
+        
+        .timer {
+            font-size: min(1.5rem, 5vw);
+            margin: 0;
+            color: var(--key-text);
+        }
+        
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            width: min(330px, 95vw);
+            aspect-ratio: 5/6;
+            margin: 0 auto;
+            padding: 5px;
+        }
+
+        .tile {
+            aspect-ratio: 1;
+            border: 2px solid var(--tile-border);
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(24px, 6vw, 32px);
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        h1 {
+            color: var(--correct-color);
+            margin: 5px 0;
+            font-size: clamp(24px, 8vw, 36px);
+            letter-spacing: 1px;
+        }
+
+        .timer {
+            font-size: clamp(16px, 5vw, 20px);
+            margin: 0;
+            color: var(--key-text);
+        }
+
+        @media (orientation: landscape) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 4px;
+            }
+
+            h1, .timer {
+                width: 100%;
+                text-align: center;
+                margin: 2px 0;
+            }
+
+            #grid {
+                width: min(45vh, 330px);
+                margin: 0;
+            }
+
+            #keyboard {
+                width: min(55vh, var(--keyboard-width));
+                margin: 0;
+            }
+        }
+        
+        #keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            gap: 6px;
+            padding: 5px;
+            margin-bottom: env(safe-area-inset-bottom, 5px);
+        }
+        
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+            touch-action: manipulation;
+        }
+        
+        .key {
+            background-color: var(--key-bg);
+            color: var(--key-text);
+            border: none;
+            border-radius: var(--border-radius);
+            height: 48px;
+            margin: 0;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: min(16px, 3.5vw);
+            flex: 1;
+            min-width: 20px;
+            max-width: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .key.wide {
+            max-width: 60px;
+        }
+        
+        .key.correct {
+            background-color: var(--correct-color);
+            color: white;
+        }
+        
+        .key.present {
+            background-color: var(--present-color);
+            color: white;
+        }
+        
+        .key.absent {
+            background-color: var(--absent-color);
+            color: white;
+        }
+        
+        .tile {
+            aspect-ratio: 1;
+            width: 100%;
+            border: 2px solid var(--tile-border);
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: min(32px, 6vw);
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            background-color: white;
         }
         h1 {
             color: #333;
@@ -255,23 +502,100 @@
 
         @media (max-height: 600px) {
             .game-container {
-                padding: 5px;
+                gap: 5px;
             }
             .tile {
                 font-size: min(24px, 5vw);
             }
             .key {
                 height: 40px;
-                font-size: min(14px, 3.5vw);
-            }
-            .timer {
-                font-size: 1.2rem;
-                margin-bottom: 10px;
             }
             h1 {
-                font-size: 2rem;
-                margin-bottom: 10px;
+                font-size: min(2rem, 6vw);
+                margin: 2px 0;
             }
+            .timer {
+                font-size: min(1.2rem, 4vw);
+            }
+            #message {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            #grid {
+                max-width: 300px;
+            }
+            .key {
+                height: 42px;
+            }
+        }
+
+        @media (min-height: 800px) {
+            .game-container {
+                gap: 20px;
+            }
+        }
+
+        @media (orientation: landscape) {
+            .game-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                height: 100vh;
+            }
+            h1, .timer {
+                width: 100%;
+                text-align: center;
+                margin: 2px 0;
+            }
+            #grid {
+                margin: 0;
+                max-height: 70vh;
+            }
+            #keyboard {
+                max-width: 60%;
+            }
+        }
+
+        #message {
+            text-align: center;
+            padding: 5px;
+            min-height: 20px;
+            color: var(--correct-color);
+        }
+
+        #message.error {
+            color: #ff4444;
+            animation: shake 0.5s;
+        }
+
+        .popup {
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+        }
+
+        #popup-close {
+            background-color: var(--correct-color);
+        }
+
+        .correct {
+            background-color: var(--correct-color);
+            color: white;
+            border: none;
+        }
+        
+        .present {
+            background-color: var(--present-color);
+            color: white;
+            border: none;
+        }
+        
+        .absent {
+            background-color: var(--absent-color);
+            color: white;
+            border: none;
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
@@ -320,14 +644,14 @@
         <div class="timer" id="timer">00:00</div>
         <div id="grid"></div>
         <div id="keyboard"></div>
-        <div id="message">Seni çok seviyorum Yıldızım ❤️</div>
+        <div id="message">❤️⭐️ 2025 Efe Cem Erdat</div>
         <button id="replay-btn">Yeniden Oyna</button>
     </div>
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js', { scope: './' })
-                .then(registration => console.log('ServiceWorker registered with scope:', registration.scope))
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('ServiceWorker registered'))
                 .catch(error => console.log('ServiceWorker registration failed:', error));
         }
 
@@ -6477,7 +6801,7 @@
                 });
 
                 document.getElementById('replay-btn').style.display = 'none';
-                document.getElementById('message').textContent = "Seni çok seviyorum Yıldızım ❤️";
+                document.getElementById('message').textContent = "❤️⭐️ 2025 Efe Cem Erdat";
                 document.getElementById('message').className = '';
 
                 this.stopTimer();
