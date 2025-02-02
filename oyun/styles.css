@@ -103,17 +103,62 @@ h1 {
     width: 100%;
     min-height: 0;
     overflow: hidden;
-    padding: 10px 0;
-    max-height: calc(100vh - 250px);
+    padding: 5px 0;
+    max-height: calc(100vh - 220px); /* Reduced from 250px */
 }
 
 #grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: min(1vh, 5px);
-    width: min(100%, min(65vh, 330px));
-    height: min(78vh, 396px);
+    gap: min(0.8vh, 4px); /* Reduced gap */
+    width: min(100%, min(60vh, 330px));
+    height: min(70vh, 396px); /* Adjusted height */
     margin: auto;
+}
+
+/* Added new media query for small height screens */
+@media (max-height: 670px) {
+    .game-container {
+        gap: 5px;
+        padding: 5px;
+    }
+    
+    h1 {
+        margin: 2px 0;
+    }
+
+    .timer-container {
+        margin: 2px auto;
+    }
+
+    .grid-container {
+        padding: 2px 0;
+    }
+
+    #grid {
+        gap: 3px;
+        height: min(65vh, 396px);
+    }
+
+    .tile {
+        font-size: min(3.5vh, 32px);
+    }
+}
+
+/* Additional adjustments for very small screens */
+@media (max-height: 600px) {
+    #grid {
+        height: min(60vh, 396px);
+        gap: 2px;
+    }
+
+    .tile {
+        font-size: min(3vh, 28px);
+    }
+
+    #keyboard {
+        height: min(160px, 22vh);
+    }
 }
 
 .tile {
