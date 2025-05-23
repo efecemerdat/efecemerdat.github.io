@@ -1,4 +1,30 @@
 /* style.css */
+
+/* Local Fonts */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/roboto-400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/roboto-500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rubik Mono One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/rubik-mono-one.ttf') format('truetype');
+}
+
 :root {
   --bg: #0e0e1a;
   --cell-bg: #1a1a2e;
