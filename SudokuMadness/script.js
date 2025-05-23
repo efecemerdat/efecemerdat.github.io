@@ -2,6 +2,7 @@
 
 // Sound Effect Utility
 function playTone(freq, duration = 150) {
+  if (isMuted) return;
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -19,6 +20,7 @@ let solution = [];
 let shuffleCounter = 0;
 let timerInterval = null;
 let activeCell = null;
+let isMuted = false;
 
 // DOM Refs
 const boardEl    = document.getElementById('board');
@@ -26,19 +28,27 @@ const counterEl  = document.getElementById('shuffle-counter');
 const timerEl    = document.getElementById('timer');
 const numpadEl   = document.getElementById('numpad');
 const newGameBtn = document.getElementById('new-game');
+const dialogEl   = document.getElementById('game-dialog');
+const dialogTitle = document.getElementById('dialog-title');
+const dialogText = document.getElementById('dialog-text');
+const dialogBtn1 = document.getElementById('dialog-btn1');
+const dialogBtn2 = document.getElementById('dialog-btn2');
+const muteBtn = document.getElementById('mute-btn');
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
-  newGame();
+  showIntroduction();
   boardEl.addEventListener('click', onCellClick);
   numpadEl.addEventListener('click', onNumpadClick);
   document.addEventListener('keydown', onKeyDown);
   newGameBtn.addEventListener('click', newGame);
+  muteBtn.addEventListener('click', toggleMute);
 });
 
 // New Game
 function newGame() {
   clearInterval(timerInterval);
+  boardEl.classList.remove('win-effect', 'shuffle-effect');
   ({ full: solution } = generateFullSolution());
 
   let puzzle;
@@ -49,6 +59,7 @@ function newGame() {
 
   shuffleCounter = rand(2, 5);
   counterEl.textContent = shuffleCounter;
+  updateCounterStyle(shuffleCounter);
 
   renderBoard();
   startTimer();
@@ -70,7 +81,6 @@ function startTimer() {
 function renderBoard() {
   boardEl.innerHTML = '';
   clearHighlights();
-  numpadEl.classList.remove('visible');
   const accent = getComputedStyle(document.documentElement)
     .getPropertyValue('--accent').trim();
 
@@ -103,12 +113,63 @@ function clearHighlights() {
   document.querySelectorAll('.cell.highlight').forEach(c => c.classList.remove('highlight'));
 }
 
+// Update Counter Style
+function updateCounterStyle(count) {
+  counterEl.classList.remove('red', 'yellow', 'green');
+  if (count === 1) counterEl.classList.add('red');
+  else if (count === 2) counterEl.classList.add('yellow');
+  else if (count > 2) counterEl.classList.add('green');
+}
+
+// Dialog System
+function showDialog(title, text, btn1Text, btn1Action, btn2Text = '', btn2Action = null) {
+  dialogTitle.textContent = title;
+  dialogText.innerHTML = text;
+  dialogBtn1.textContent = btn1Text;
+  dialogBtn1.onclick = () => {
+    hideDialog();
+    if (btn1Action) btn1Action();
+  };
+  
+  if (btn2Text) {
+    dialogBtn2.textContent = btn2Text;
+    dialogBtn2.style.display = 'block';
+    dialogBtn2.onclick = () => {
+      hideDialog();
+      if (btn2Action) btn2Action();
+    };
+  } else {
+    dialogBtn2.style.display = 'none';
+  }
+  
+  dialogEl.classList.add('show');
+}
+
+function hideDialog() {
+  dialogEl.classList.remove('show');
+}
+
+function showIntroduction() {
+  showDialog(
+    '🎯 Welcome to Sudoku Madness!',
+    'Fill the grid with numbers 1-9. Every correct answer gets you closer to a  <span class="shuffle-text">SHUFFLE</span>  that reorganizes the puzzle!',
+    'Start Playing!',
+    newGame
+  );
+}
+
+// Mute Toggle
+function toggleMute() {
+  isMuted = !isMuted;
+  muteBtn.textContent = isMuted ? 'MUTED' : 'SOUND';
+  muteBtn.classList.toggle('muted', isMuted);
+}
+
 // Cell Click
 function onCellClick(e) {
   const cell = e.target;
   if (!cell.classList.contains('cell')) return;
   clearHighlights();
-  numpadEl.classList.remove('visible');
 
   if (cell.textContent) {
     document.querySelectorAll('.cell').forEach(c => {
@@ -119,7 +180,6 @@ function onCellClick(e) {
     if (activeCell) activeCell.classList.remove('active');
     activeCell = cell;
     cell.classList.add('active');
-    numpadEl.classList.add('visible');
   }
 }
 
@@ -128,14 +188,6 @@ function onNumpadClick(e) {
   const btn = e.target;
   if (!btn.classList.contains('num-btn') || !activeCell) return;
   const v = btn.dataset.value;
-  if (v === 'clear') {
-    board[activeCell.dataset.r][activeCell.dataset.c] = 0;
-    activeCell.textContent = '';
-    activeCell.classList.remove('active');
-    numpadEl.classList.remove('visible');
-    activeCell = null;
-    return;
-  }
   handleInput(+v);
 }
 
@@ -146,7 +198,6 @@ function onKeyDown(e) {
     board[activeCell.dataset.r][activeCell.dataset.c] = 0;
     activeCell.textContent = '';
     activeCell.classList.remove('active');
-    numpadEl.classList.remove('visible');
     activeCell = null;
     return;
   }
@@ -164,7 +215,6 @@ function handleInput(val) {
     activeCell.classList.remove('active');
     activeCell.classList.add('correct');
     playTone(440, 120);
-    numpadEl.classList.remove('visible');
     activeCell = null;
     handleCorrect();
   } else {
@@ -179,19 +229,28 @@ function handleCorrect() {
   shuffleCounter--;
   if (shuffleCounter <= 0) {
     counterEl.textContent = 0;
+    updateCounterStyle(0);
     playTone(600, 300);
     doShuffle();
     shuffleCounter = rand(2, 5);
     counterEl.textContent = shuffleCounter;
+    updateCounterStyle(shuffleCounter);
   } else {
     counterEl.textContent = shuffleCounter;
+    updateCounterStyle(shuffleCounter);
   }
   checkWin();
 }
 
-// Shuffle by empty count
+// Shuffle by empty count with enhanced effects
 function doShuffle() {
-  const emptyCount = Array.from(document.querySelectorAll('.cell')).filter(c => !c.textContent).length;
+  const cells = document.querySelectorAll('.cell');
+  const emptyCount = Array.from(cells).filter(c => !c.textContent).length;
+  
+  // Add board-wide shake effect only
+  boardEl.classList.add('shuffle-effect');
+  setTimeout(() => boardEl.classList.remove('shuffle-effect'), 800);
+  
   const MAX_ATTEMPTS = 100;
   let newPuzzle, attempts = 0;
 
@@ -202,7 +261,7 @@ function doShuffle() {
 
   if (attempts >= MAX_ATTEMPTS && emptyCount >= 10) {
     console.warn('Failed to regenerate solvable shuffle; starting fresh.');
-    newGame();
+    setTimeout(newGame, 800);
     return;
   }
   if (attempts >= MAX_ATTEMPTS) {
@@ -211,7 +270,7 @@ function doShuffle() {
   }
 
   board = newPuzzle;
-  renderBoard();
+  setTimeout(() => renderBoard(), 800);
 }
 
 // Win Check
@@ -219,8 +278,29 @@ function checkWin() {
   for (let r = 0; r < 9; r++)
     for (let c = 0; c < 9; c++)
       if (board[r][c] !== solution[r][c]) return;
+  
   clearInterval(timerInterval);
-  setTimeout(() => alert(`🎉 You won in ${timerEl.textContent.slice(6)}!`), 100);
+  
+  // Add win effect to board
+  boardEl.classList.add('win-effect');
+  
+  setTimeout(() => {
+    showDialog(
+      '🎉 SUDOKU MASTER!',
+      `Congratulations! You've conquered the madness in just ${timerEl.textContent.slice(6)}! Ready for another challenge?`,
+      'New Game',
+      () => {
+        boardEl.classList.remove('win-effect');
+        newGame();
+      },
+      'Celebrate',
+      () => {
+        playTone(440, 200);
+        setTimeout(() => playTone(554, 200), 200);
+        setTimeout(() => playTone(659, 300), 400);
+      }
+    );
+  }, 100);
 }
 
 // Puzzle Generator & Helpers
