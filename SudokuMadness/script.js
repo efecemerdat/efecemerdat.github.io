@@ -21,6 +21,9 @@ let shuffleCounter = 0;
 let timerInterval = null;
 let activeCell = null;
 let isMuted = false;
+let gameStartTime = null;
+let pausedTime = 0;
+let isGameActive = false;
 
 // DOM Refs
 const boardEl    = document.getElementById('board');
@@ -67,14 +70,32 @@ function newGame() {
 
 // Timer
 function startTimer() {
-  const start = Date.now();
+  gameStartTime = Date.now();
+  pausedTime = 0;
+  isGameActive = true;
   timerEl.textContent = 'Time: 00:00';
   timerInterval = setInterval(() => {
-    const diff = Date.now() - start;
-    const m = String(Math.floor(diff / 60000)).padStart(2, '0');
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-    timerEl.textContent = `Time: ${m}:${s}`;
+    if (isGameActive) {
+      const diff = Date.now() - gameStartTime - pausedTime;
+      const m = String(Math.floor(diff / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      timerEl.textContent = `Time: ${m}:${s}`;
+    }
   }, 500);
+}
+
+function pauseTimer() {
+  if (isGameActive) {
+    isGameActive = false;
+    pausedTime += Date.now() - gameStartTime;
+  }
+}
+
+function resumeTimer() {
+  if (!isGameActive && gameStartTime) {
+    isGameActive = true;
+    gameStartTime = Date.now();
+  }
 }
 
 // Render Board
@@ -123,6 +144,7 @@ function updateCounterStyle(count) {
 
 // Dialog System
 function showDialog(title, text, btn1Text, btn1Action, btn2Text = '', btn2Action = null) {
+  pauseTimer();
   dialogTitle.textContent = title;
   dialogText.innerHTML = text;
   dialogBtn1.textContent = btn1Text;
@@ -147,6 +169,7 @@ function showDialog(title, text, btn1Text, btn1Action, btn2Text = '', btn2Action
 
 function hideDialog() {
   dialogEl.classList.remove('show');
+  resumeTimer();
 }
 
 function showIntroduction() {
@@ -161,7 +184,7 @@ function showIntroduction() {
 // Mute Toggle
 function toggleMute() {
   isMuted = !isMuted;
-  muteBtn.textContent = isMuted ? 'MUTED' : 'SOUND';
+  muteBtn.textContent = isMuted ? '♪̸' : '♪';
   muteBtn.classList.toggle('muted', isMuted);
 }
 
