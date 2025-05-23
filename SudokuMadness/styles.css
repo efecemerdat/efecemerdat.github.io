@@ -199,9 +199,11 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-top: 16px;
   width: 100%;
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .num-btn {
@@ -209,10 +211,23 @@ h1 {
   border: none;
   border-radius: 4px;
   font-size: 1rem;
-  padding: 8px 12px;
+  padding: 8px 6px;
   cursor: pointer;
   color: var(--text);
-  min-width: 40px;
+  min-width: 32px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  #numpad {
+    gap: 2px;
+  }
+  
+  .num-btn {
+    padding: 6px 4px;
+    min-width: 28px;
+    font-size: 0.9rem;
+  }
 }
 
 .num-btn:hover {
