@@ -10,13 +10,14 @@
   --timer: #a5c9ca;
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 html, body {
+  width: 100%;
   height: 100%;
 }
 
@@ -31,16 +32,20 @@ body {
 }
 
 .container {
+  width: 90vw;
+  height: 90vh;
+  max-width: 600px;
+  max-height: 800px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 90%;            /* scale to 90% of container */
   padding: 10px;
+  background: var(--bg);
 }
 
 h1 {
   font-family: 'Rubik Mono One', sans-serif;
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 0.5rem;
   background: linear-gradient(90deg, #ff4d5a, #f9c74f);
   -webkit-background-clip: text;
@@ -75,11 +80,16 @@ h1 {
 #board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
+  grid-auto-rows: 1fr;
   gap: 2px;
   width: 100%;
-  flex: 1 1 auto;
+  max-width: fit-content;            /* fill container width */
+  max-height: 100%;       /* do not exceed container height */
+  aspect-ratio: 1 / 1;    /* maintain square board */
   position: relative;
 }
+
+
 
 .cell {
   background: var(--cell-bg);
@@ -88,7 +98,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   user-select: none;
   transition: background 0.2s;
@@ -121,7 +131,7 @@ h1 {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
+  0%,100% { transform: translateX(0); }
   25% { transform: translateX(-5px); }
   50% { transform: translateX(5px); }
   75% { transform: translateX(-5px); }
@@ -143,10 +153,11 @@ h1 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0,0,0,0.9);
   padding: 16px;
   border-radius: 8px;
-  width: min(80vmin, 300px);
+  width: 80vw;
+  max-width: 300px;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   z-index: 100;
@@ -163,7 +174,6 @@ h1 {
   font-size: 1rem;
   padding: 8px 0;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
 .num-btn:hover {
@@ -179,5 +189,4 @@ h3.footer {
   margin-top: 8px;
   font-size: 0.8rem;
   color: var(--timer);
-  align-self: center;
 }
