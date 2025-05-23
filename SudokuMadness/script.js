@@ -1,17 +1,52 @@
 // ────── script.js ─────────
 
 // Sound Effect Utility
+let audioContext = null;
+let currentSound = null;
+
+function initAudio() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioContext;
+}
+
 function playTone(freq, duration = 150) {
   if (isMuted) return;
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  // Stop any currently playing sound
+  if (currentSound) {
+    try {
+      currentSound.stop();
+    } catch (e) {
+      // Sound already stopped
+    }
+  }
+  
+  const ctx = initAudio();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
+  
   osc.frequency.value = freq;
   osc.connect(gain);
   gain.connect(ctx.destination);
-  osc.start();
+  
+  gain.gain.setValueAtTime(0.1, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration / 1000);
-  setTimeout(() => { osc.stop(); ctx.close(); }, duration);
+  
+  currentSound = osc;
+  osc.start();
+  
+  setTimeout(() => {
+    try {
+      osc.stop();
+      if (currentSound === osc) {
+        currentSound = null;
+      }
+    } catch (e) {
+      // Sound already stopped
+    }
+  }, duration);
 }
 
 // Game State
@@ -46,6 +81,54 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', onKeyDown);
   newGameBtn.addEventListener('click', newGame);
   muteBtn.addEventListener('click', toggleMute);
+  
+  // Prevent zoom gestures
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+  document.addEventListener('gesturechange', (e) => e.preventDefault());
+  document.addEventListener('gestureend', (e) => e.preventDefault());
+  
+  // Prevent double-tap zoom
+  let lastTouchEnd = 0;
+  let preventZoom = false;
+  
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+      preventZoom = true;
+      setTimeout(() => { preventZoom = false; }, 500);
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+  
+  // Additional double-tap prevention
+  document.addEventListener('click', (e) => {
+    if (preventZoom) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+  
+  // Prevent pinch zoom
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  // Prevent wheel zoom
+  document.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 });
 
 // New Game
