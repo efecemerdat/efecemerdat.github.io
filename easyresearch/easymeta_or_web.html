@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyMeta OR Web</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .download-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .panel h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-toggle {
+            display: flex;
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .cross-table-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .cross-table {
+            display: grid;
+            grid-template-columns: 100px 80px 80px 80px;
+            gap: 5px;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .cross-table-header {
+            font-weight: bold;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        .cross-table input {
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .btn-success {
+            background: #38a169;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2f855a;
+        }
+
+        .studies-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .studies-table th, .studies-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+
+        .studies-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .studies-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .plot-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin: 20px 0;
+            min-height: 400px;
+        }
+
+        .plot-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #38a169;
+        }
+
+        .warning-message {
+            background: #fef5e7;
+            color: #c05621;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ed8936;
+        }
+
+        .axis {
+            font-size: 12px;
+        }
+
+        .axis path, .axis line {
+            fill: none;
+            stroke: #666;
+            shape-rendering: crispEdges;
+        }
+
+        .reference-line {
+            stroke: #e53e3e;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+        }
+
+        .pooled-diamond {
+            fill: #38a169;
+            stroke: #2f855a;
+            stroke-width: 2;
+        }
+
+        .funnel-point {
+            fill: #667eea;
+            opacity: 0.7;
+            cursor: pointer;
+        }
+
+        .funnel-point:hover {
+            opacity: 1;
+            r: 6;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            
+            .cross-table {
+                grid-template-columns: 80px 60px 60px 60px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EasyMeta OR Web</h1>
+            <p>Professional meta-analysis for odds ratios with forest and funnel plots</p>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2>Data Entry</h2>
+                
+                <div class="input-toggle">
+                    <button class="toggle-btn active" onclick="toggleInputMode('crosstable')">2×2 Cross Table</button>
+                    <button class="toggle-btn" onclick="toggleInputMode('or')">OR + 95% CI</button>
+                    <button class="toggle-btn" onclick="toggleInputMode('logor')">LogOR + SE</button>
+                </div>
+
+                <div id="data-entry-form">
+                    <div class="form-group">
+                        <label for="study-name">Study Name</label>
+                        <input type="text" id="study-name" placeholder="Enter study name">
+                    </div>
+
+                    <div id="input-container">
+                        <!-- Cross table will be inserted here -->
+                        <div class="cross-table-container">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <strong>2×2 Contingency Table</strong>
+                            </div>
+                            <div class="cross-table">
+                                <div></div>
+                                <div class="cross-table-header">Exposed</div>
+                                <div class="cross-table-header">Unexposed</div>
+                                <div class="cross-table-header">Total</div>
+                                
+                                <div class="cross-table-header">Cases</div>
+                                <input type="number" id="cell-a" placeholder="a" min="0">
+                                <input type="number" id="cell-b" placeholder="b" min="0">
+                                <div id="total-cases" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                                
+                                <div class="cross-table-header">Controls</div>
+                                <input type="number" id="cell-c" placeholder="c" min="0">
+                                <input type="number" id="cell-d" placeholder="d" min="0">
+                                <div id="total-controls" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                                
+                                <div class="cross-table-header">Total</div>
+                                <div id="total-exposed" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                                <div id="total-unexposed" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                                <div id="grand-total" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                            </div>
+                            <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
+                                OR = (a × d) / (b × c)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 15px; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="addStudy()">Add Study</button>
+                    </div>
+
+                    <!-- Plot Customization -->
+                    <div class="form-group" style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 20px;">
+                        <h3 style="margin-bottom: 15px; color: #4a5568; font-size: 1.1rem;">Plot Customization</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label for="forest-title">Forest Plot Title</label>
+                                <input type="text" id="forest-title" placeholder="EasyMeta OR Web: Meta-Analysis Results" value="EasyMeta OR Web: Meta-Analysis Results">
+                            </div>
+                            <div>
+                                <label for="funnel-title">Funnel Plot Title</label>
+                                <input type="text" id="funnel-title" placeholder="EasyMeta OR Web: Publication Bias Assessment" value="EasyMeta OR Web: Publication Bias Assessment">
+                            </div>
+                            <div>
+                                <label for="favours-left">Favours (Left)</label>
+                                <input type="text" id="favours-left" placeholder="Favours Intervention" value="Favours Intervention">
+                            </div>
+                            <div>
+                                <label for="favours-right">Favours (Right)</label>
+                                <input type="text" id="favours-right" placeholder="Favours Control" value="Favours Control">
+                            </div>
+                        </div>
+                        
+                        <!-- Meta-Analysis Model Selection -->
+                        <div style="margin-top: 20px;">
+                            <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #4a5568;">Meta-Analysis Model</label>
+                            <div style="display: flex; gap: 20px; background: #f7fafc; padding: 15px; border-radius: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="model-selection" value="fixed" style="margin-right: 8px;">
+                                    <span>Fixed Effects Only</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="model-selection" value="random" style="margin-right: 8px;">
+                                    <span>Random Effects Only</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="radio" name="model-selection" value="both" checked style="margin-right: 8px;">
+                                    <span>Both Models</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-success" onclick="calculateMetaAnalysis()">Calculate Meta-Analysis</button>
+                        <button class="btn btn-danger" onclick="clearAllStudies()">Clear All</button>
+                    </div>
+                </div>
+
+                <div id="message-area"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Studies Overview</h2>
+                <div style="overflow-x: auto;">
+                    <table class="studies-table" id="studies-table">
+                        <thead>
+                            <tr>
+                                <th>Study</th>
+                                <th>OR</th>
+                                <th>95% CI</th>
+                                <th>LogOR</th>
+                                <th>SE</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studies-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Section -->
+        <div class="download-section">
+            <h2 style="color: #4a5568; margin-bottom: 10px;">📥 Download Plots</h2>
+            <p style="color: #666;">Save your forest and funnel plots (run meta-analysis first)</p>
+            <div class="download-buttons">
+                <button class="download-btn" onclick="downloadPlot('forest', 'svg')">
+                    🌲 Forest SVG
+                </button>
+                <button class="download-btn" onclick="downloadPlot('forest', 'png')">
+                    🌲 Forest PNG
+                </button>
+                <button class="download-btn" onclick="downloadPlot('funnel', 'svg')">
+                    🔍 Funnel SVG
+                </button>
+                <button class="download-btn" onclick="downloadPlot('funnel', 'png')">
+                    🔍 Funnel PNG
+                </button>
+            </div>
+        </div>
+
+        <!-- Plot Areas -->
+        <div class="plot-container">
+            <div class="plot-title">🌲 Forest Plot</div>
+            <div id="forest-plot">Add studies and run meta-analysis to see forest plot...</div>
+        </div>
+
+        <div class="plot-container">
+            <div class="plot-title">🔍 Funnel Plot</div>
+            <div id="funnel-plot">Add studies and run meta-analysis to see funnel plot...</div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <div class="results-grid">
+                <div class="stats-panel">
+                    <h3 style="margin-bottom: 15px; color: #4a5568;">Statistical Summary</h3>
+                    <div id="stats-content"></div>
+                </div>
+                
+                <div class="stats-panel">
+                    <h3 style="margin-bottom: 15px; color: #4a5568;">Heterogeneity Tests</h3>
+                    <div id="heterogeneity-content"></div>
+                    <div id="heterogeneity-interpretation" style="margin-top: 15px; display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Educational Information -->
+            <div class="stats-panel">
+                <h3 style="margin-bottom: 15px; color: #4a5568;">📚 Understanding Meta-Analysis</h3>
+                <div style="font-size: 14px; line-height: 1.6;">
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #667eea;">I² (I-squared) Statistic:</strong>
+                        <p style="margin: 5px 0;">Measures heterogeneity between studies (0-40%: low, 40-75%: moderate, >75%: high)</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #667eea;">Overall Effect Test:</strong>
+                        <p style="margin: 5px 0;">Z-test determines if pooled OR significantly differs from 1.0 (p<0.05 = significant effect)</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #667eea;">2×2 Table:</strong>
+                        <p style="margin: 5px 0;">a=exposed cases, b=unexposed cases, c=exposed controls, d=unexposed controls</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="background: rgba(0,0,0,0.1); backdrop-filter: blur(10px); margin-top: 40px; padding: 20px 0; text-align: center; color: white; font-size: 14px; border-top: 1px solid rgba(255,255,255,0.2);">
+            <div class="container">
+                <p style="margin: 0; opacity: 0.9;">2025 © efe cem erdat, MD</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let studies = [];
+        let inputMode = 'crosstable';
+        let currentStats = {};
+
+        function toggleInputMode(mode) {
+            inputMode = mode;
+            const buttons = document.querySelectorAll('.toggle-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const inputContainer = document.getElementById('input-container');
+
+            if (mode === 'crosstable') {
+                inputContainer.innerHTML = `
+                    <div class="cross-table-container">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <strong>2×2 Contingency Table</strong>
+                        </div>
+                        <div class="cross-table">
+                            <div></div>
+                            <div class="cross-table-header">Exposed</div>
+                            <div class="cross-table-header">Unexposed</div>
+                            <div class="cross-table-header">Total</div>
+                            
+                            <div class="cross-table-header">Cases</div>
+                            <input type="number" id="cell-a" placeholder="a" min="0" oninput="updateTotals()">
+                            <input type="number" id="cell-b" placeholder="b" min="0" oninput="updateTotals()">
+                            <div id="total-cases" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                            
+                            <div class="cross-table-header">Controls</div>
+                            <input type="number" id="cell-c" placeholder="c" min="0" oninput="updateTotals()">
+                            <input type="number" id="cell-d" placeholder="d" min="0" oninput="updateTotals()">
+                            <div id="total-controls" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                            
+                            <div class="cross-table-header">Total</div>
+                            <div id="total-exposed" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                            <div id="total-unexposed" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                            <div id="grand-total" style="text-align: center; color: #666; font-weight: bold;">-</div>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
+                            OR = (a × d) / (b × c)
+                        </div>
+                    </div>
+                `;
+            } else if (mode === 'or') {
+                inputContainer.innerHTML = `
+                    <div class="form-row">
+                        <div>
+                            <label for="or-value">OR</label>
+                            <input type="number" id="or-value" step="0.001" placeholder="1.75">
+                        </div>
+                        <div>
+                            <label for="ci-lower">CI Lower</label>
+                            <input type="number" id="ci-lower" step="0.001" placeholder="1.25">
+                        </div>
+                        <div>
+                            <label for="ci-upper">CI Upper</label>
+                            <input type="number" id="ci-upper" step="0.001" placeholder="2.45">
+                        </div>
+                    </div>
+                `;
+            } else if (mode === 'logor') {
+                inputContainer.innerHTML = `
+                    <div class="form-row">
+                        <div>
+                            <label for="logor-value">LogOR</label>
+                            <input type="number" id="logor-value" step="0.001" placeholder="0.560">
+                        </div>
+                        <div>
+                            <label for="se-value">SE</label>
+                            <input type="number" id="se-value" step="0.001" placeholder="0.175">
+                        </div>
+                        <div></div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateTotals() {
+            const a = parseFloat(document.getElementById('cell-a').value) || 0;
+            const b = parseFloat(document.getElementById('cell-b').value) || 0;
+            const c = parseFloat(document.getElementById('cell-c').value) || 0;
+            const d = parseFloat(document.getElementById('cell-d').value) || 0;
+
+            document.getElementById('total-cases').textContent = a + b || '-';
+            document.getElementById('total-controls').textContent = c + d || '-';
+            document.getElementById('total-exposed').textContent = a + c || '-';
+            document.getElementById('total-unexposed').textContent = b + d || '-';
+            document.getElementById('grand-total').textContent = a + b + c + d || '-';
+        }
+
+        function showMessage(text, type = 'error') {
+            const messageArea = document.getElementById('message-area');
+            messageArea.innerHTML = `<div class="${type}-message">${text}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        function addStudy() {
+            const studyName = document.getElementById('study-name').value.trim();
+            
+            if (!studyName) {
+                showMessage('Please enter a study name');
+                return;
+            }
+
+            let or, ciLower, ciUpper, logOR, se;
+
+            if (inputMode === 'crosstable') {
+                const a = parseFloat(document.getElementById('cell-a').value);
+                const b = parseFloat(document.getElementById('cell-b').value);
+                const c = parseFloat(document.getElementById('cell-c').value);
+                const d = parseFloat(document.getElementById('cell-d').value);
+
+                if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+                    showMessage('Please enter all four cell values (a, b, c, d)');
+                    return;
+                }
+
+                if (a < 0 || b < 0 || c < 0 || d < 0) {
+                    showMessage('All cell values must be non-negative');
+                    return;
+                }
+
+                if (a + b + c + d === 0) {
+                    showMessage('At least one cell must be greater than 0');
+                    return;
+                }
+
+                // Apply continuity correction if any cell is 0
+                let corrA = a, corrB = b, corrC = c, corrD = d;
+                if (a === 0 || b === 0 || c === 0 || d === 0) {
+                    corrA += 0.5;
+                    corrB += 0.5;
+                    corrC += 0.5;
+                    corrD += 0.5;
+                    showMessage('Applied 0.5 continuity correction for zero cells', 'warning');
+                }
+
+                or = (corrA * corrD) / (corrB * corrC);
+                logOR = Math.log(or);
+                se = Math.sqrt(1/corrA + 1/corrB + 1/corrC + 1/corrD);
+                ciLower = Math.exp(logOR - 1.96 * se);
+                ciUpper = Math.exp(logOR + 1.96 * se);
+
+            } else if (inputMode === 'or') {
+                or = parseFloat(document.getElementById('or-value').value);
+                ciLower = parseFloat(document.getElementById('ci-lower').value);
+                ciUpper = parseFloat(document.getElementById('ci-upper').value);
+
+                if (isNaN(or) || isNaN(ciLower) || isNaN(ciUpper)) {
+                    showMessage('Please enter valid numeric values for OR and CI bounds');
+                    return;
+                }
+
+                if (or <= 0 || ciLower <= 0 || ciUpper <= 0) {
+                    showMessage('OR and CI values must be positive');
+                    return;
+                }
+
+                if (ciLower >= ciUpper) {
+                    showMessage('CI Lower must be less than CI Upper');
+                    return;
+                }
+
+                logOR = Math.log(or);
+                se = (Math.log(ciUpper) - Math.log(ciLower)) / 3.92;
+
+            } else if (inputMode === 'logor') {
+                logOR = parseFloat(document.getElementById('logor-value').value);
+                se = parseFloat(document.getElementById('se-value').value);
+
+                if (isNaN(logOR) || isNaN(se)) {
+                    showMessage('Please enter valid numeric values for LogOR and SE');
+                    return;
+                }
+
+                if (se <= 0) {
+                    showMessage('SE must be positive');
+                    return;
+                }
+
+                or = Math.exp(logOR);
+                ciLower = Math.exp(logOR - 1.96 * se);
+                ciUpper = Math.exp(logOR + 1.96 * se);
+            }
+
+            const study = {
+                id: Date.now(),
+                name: studyName,
+                or: or,
+                ciLower: ciLower,
+                ciUpper: ciUpper,
+                logOR: logOR,
+                se: se,
+                weight: 0
+            };
+
+            studies.push(study);
+            updateStudiesTable();
+            clearInputs();
+            showMessage('Study added successfully!', 'success');
+        }
+
+        function clearInputs() {
+            document.getElementById('study-name').value = '';
+            if (inputMode === 'crosstable') {
+                document.getElementById('cell-a').value = '';
+                document.getElementById('cell-b').value = '';
+                document.getElementById('cell-c').value = '';
+                document.getElementById('cell-d').value = '';
+                updateTotals();
+            } else if (inputMode === 'or') {
+                document.getElementById('or-value').value = '';
+                document.getElementById('ci-lower').value = '';
+                document.getElementById('ci-upper').value = '';
+            } else if (inputMode === 'logor') {
+                document.getElementById('logor-value').value = '';
+                document.getElementById('se-value').value = '';
+            }
+        }
+
+        function updateStudiesTable() {
+            const tbody = document.getElementById('studies-tbody');
+            tbody.innerHTML = '';
+
+            studies.forEach(study => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${study.name}</td>
+                    <td>${study.or.toFixed(3)}</td>
+                    <td>[${study.ciLower.toFixed(3)}, ${study.ciUpper.toFixed(3)}]</td>
+                    <td>${study.logOR.toFixed(3)}</td>
+                    <td>${study.se.toFixed(3)}</td>
+                    <td>${study.weight ? study.weight.toFixed(1) + '%' : '-'}</td>
+                `;
+            });
+        }
+
+        function clearAllStudies() {
+            studies = [];
+            updateStudiesTable();
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('forest-plot').innerHTML = 'Add studies and run meta-analysis to see forest plot...';
+            document.getElementById('funnel-plot').innerHTML = 'Add studies and run meta-analysis to see funnel plot...';
+        }
+
+        function normalCDF(x) {
+            const a1 =  0.254829592;
+            const a2 = -0.284496736;
+            const a3 =  1.421413741;
+            const a4 = -1.453152027;
+            const a5 =  1.061405429;
+            const p  =  0.3275911;
+
+            const sign = x < 0 ? -1 : 1;
+            x = Math.abs(x) / Math.sqrt(2.0);
+
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+            return 0.5 * (1.0 + sign * y);
+        }
+
+        function chisquareCDF(x, df) {
+            if (x <= 0) return 0;
+            if (df <= 0) return 0;
+            
+            const gamma = (z) => {
+                const g = 7;
+                const C = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+                         771.32342877765313, -176.61502916214059, 12.507343278686905,
+                         -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+                
+                if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
+                
+                z -= 1;
+                let x = C[0];
+                for (let i = 1; i < g + 2; i++) x += C[i] / (z + i);
+                
+                const t = z + g + 0.5;
+                const sqrt2pi = Math.sqrt(2 * Math.PI);
+                return sqrt2pi * Math.pow(t, (z + 0.5)) * Math.exp(-t) * x;
+            };
+            
+            const incompleteGamma = (a, x) => {
+                if (x === 0) return 0;
+                if (a === 0) return 1;
+                
+                let sum = 1;
+                let term = 1;
+                for (let n = 1; n < 100; n++) {
+                    term *= x / (a + n - 1);
+                    sum += term;
+                    if (Math.abs(term) < 1e-15) break;
+                }
+                return Math.pow(x, a) * Math.exp(-x) * sum / gamma(a);
+            };
+            
+            return incompleteGamma(df / 2, x / 2);
+        }
+
+        function calculateMetaAnalysis() {
+            if (studies.length < 2) {
+                showMessage('At least 2 studies are required for meta-analysis');
+                return;
+            }
+
+            const selectedModel = document.querySelector('input[name="model-selection"]:checked').value;
+
+            const weights = studies.map(study => 1 / (study.se * study.se));
+            const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+            
+            studies.forEach((study, i) => {
+                study.weight = (weights[i] / totalWeight) * 100;
+            });
+
+            const weightedLogOR = studies.reduce((sum, study, i) => sum + study.logOR * weights[i], 0);
+            const pooledLogOR = weightedLogOR / totalWeight;
+            const pooledSE = Math.sqrt(1 / totalWeight);
+            const pooledOR = Math.exp(pooledLogOR);
+            const pooledCILower = Math.exp(pooledLogOR - 1.96 * pooledSE);
+            const pooledCIUpper = Math.exp(pooledLogOR + 1.96 * pooledSE);
+
+            const Q = studies.reduce((sum, study, i) => {
+                const diff = study.logOR - pooledLogOR;
+                return sum + weights[i] * diff * diff;
+            }, 0);
+            
+            const df = studies.length - 1;
+            const pValueQ = 1 - chisquareCDF(Q, df);
+            const I2 = Math.max(0, ((Q - df) / Q) * 100);
+            const tau2 = Math.max(0, (Q - df) / (totalWeight - (weights.reduce((sum, w) => sum + w*w, 0) / totalWeight)));
+
+            const randomWeights = studies.map(study => 1 / (study.se * study.se + tau2));
+            const totalRandomWeight = randomWeights.reduce((sum, w) => sum + w, 0);
+            const randomWeightedLogOR = studies.reduce((sum, study, i) => sum + study.logOR * randomWeights[i], 0);
+            const randomPooledLogOR = randomWeightedLogOR / totalRandomWeight;
+            const randomPooledSE = Math.sqrt(1 / totalRandomWeight);
+            const randomPooledOR = Math.exp(randomPooledLogOR);
+            const randomPooledCILower = Math.exp(randomPooledLogOR - 1.96 * randomPooledSE);
+            const randomPooledCIUpper = Math.exp(randomPooledLogOR + 1.96 * randomPooledSE);
+
+            const fixedZ = pooledLogOR / pooledSE;
+            const randomZ = randomPooledLogOR / randomPooledSE;
+            const fixedPValue = 2 * (1 - normalCDF(Math.abs(fixedZ)));
+            const randomPValue = 2 * (1 - normalCDF(Math.abs(randomZ)));
+
+            currentStats = {
+                Q: Q,
+                df: df,
+                pValueQ: pValueQ,
+                I2: I2,
+                tau2: tau2,
+                numStudies: studies.length,
+                fixedZ: fixedZ,
+                randomZ: randomZ,
+                fixedPValue: fixedPValue,
+                randomPValue: randomPValue
+            };
+
+            updateStudiesTable();
+            displayResults(
+                pooledOR, pooledCILower, pooledCIUpper, 
+                randomPooledOR, randomPooledCILower, randomPooledCIUpper, 
+                Q, df, pValueQ, I2, tau2, selectedModel
+            );
+            createForestPlot(pooledLogOR, pooledSE, randomPooledLogOR, randomPooledSE, selectedModel);
+            createFunnelPlot();
+        }
+
+        function displayResults(fixedOR, fixedLower, fixedUpper, randomOR, randomLower, randomUpper, Q, df, pValue, I2, tau2, selectedModel) {
+            const statsContent = document.getElementById('stats-content');
+            let statsHTML = '';
+
+            if (selectedModel === 'fixed' || selectedModel === 'both') {
+                statsHTML += `
+                    <div class="stat-item">
+                        <span class="stat-label">Fixed Effects OR:</span>
+                        <span class="stat-value">${fixedOR.toFixed(3)} [${fixedLower.toFixed(3)}, ${fixedUpper.toFixed(3)}]</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Fixed Effects P-value:</span>
+                        <span class="stat-value">${currentStats.fixedPValue < 0.001 ? '<0.001' : currentStats.fixedPValue.toFixed(3)} (Z = ${currentStats.fixedZ.toFixed(2)})</span>
+                    </div>
+                `;
+            }
+
+            if (selectedModel === 'random' || selectedModel === 'both') {
+                statsHTML += `
+                    <div class="stat-item">
+                        <span class="stat-label">Random Effects OR:</span>
+                        <span class="stat-value">${randomOR.toFixed(3)} [${randomLower.toFixed(3)}, ${randomUpper.toFixed(3)}]</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Random Effects P-value:</span>
+                        <span class="stat-value">${currentStats.randomPValue < 0.001 ? '<0.001' : currentStats.randomPValue.toFixed(3)} (Z = ${currentStats.randomZ.toFixed(2)})</span>
+                    </div>
+                `;
+            }
+
+            statsHTML += `
+                <div class="stat-item">
+                    <span class="stat-label">Number of Studies:</span>
+                    <span class="stat-value">${studies.length}</span>
+                </div>
+            `;
+
+            statsContent.innerHTML = statsHTML;
+
+            const heterogeneityContent = document.getElementById('heterogeneity-content');
+            heterogeneityContent.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">Cochran's Q:</span>
+                    <span class="stat-value">${Q.toFixed(3)} (df=${df})</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">P-value (Q test):</span>
+                    <span class="stat-value">${pValue < 0.001 ? '<0.001' : pValue.toFixed(3)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">I² (%):</span>
+                    <span class="stat-value">${I2.toFixed(1)}%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">τ² (tau-squared):</span>
+                    <span class="stat-value">${tau2.toFixed(4)}</span>
+                </div>
+            `;
+
+            let interpretation = '';
+            let recommendedModel = '';
+            let interpretationClass = '';
+
+            if (I2 < 40) {
+                interpretation = `<strong>Low Heterogeneity:</strong> Studies show consistent results.`;
+                recommendedModel = 'Fixed effects model is appropriate.';
+                interpretationClass = 'success';
+            } else if (I2 < 75) {
+                interpretation = `<strong>Moderate Heterogeneity:</strong> Some differences between studies exist.`;
+                recommendedModel = 'Random effects model may be more appropriate.';
+                interpretationClass = 'warning';
+            } else {
+                interpretation = `<strong>High Heterogeneity:</strong> Substantial differences between studies.`;
+                recommendedModel = 'Caution advised. Investigate sources of heterogeneity.';
+                interpretationClass = 'error';
+            }
+
+            const qTestInterpretation = pValue < 0.05 ? 
+                'Cochran\'s Q test indicates significant heterogeneity.' : 
+                'Cochran\'s Q test shows no significant evidence of heterogeneity.';
+
+            const interpretationDiv = document.getElementById('heterogeneity-interpretation');
+            interpretationDiv.innerHTML = `
+                <div class="${interpretationClass}-message">
+                    <strong>🎯 Interpretation:</strong><br>
+                    ${interpretation}<br>
+                    ${qTestInterpretation}<br><br>
+                    <strong>📋 Recommendation:</strong> ${recommendedModel}
+                </div>
+            `;
+            interpretationDiv.style.display = 'block';
+
+            document.getElementById('results-section').style.display = 'block';
+        }
+
+        function createForestPlot(pooledLogOR, pooledSE, randomPooledLogOR, randomPooledSE, selectedModel) {
+            const container = document.getElementById('forest-plot');
+            container.innerHTML = '';
+
+            const forestTitle = document.getElementById('forest-title').value || 'EasyMeta OR Web: Meta-Analysis Results';
+            const favoursLeft = document.getElementById('favours-left').value || 'Favours Intervention';
+            const favoursRight = document.getElementById('favours-right').value || 'Favours Control';
+
+            const margin = {top: 80, right: 200, bottom: 120, left: 200};
+            const width = 1000 - margin.left - margin.right;
+            
+            let pooledEstimates = [];
+            if (selectedModel === 'fixed') {
+                pooledEstimates = ['Fixed'];
+            } else if (selectedModel === 'random') {
+                pooledEstimates = ['Random'];
+            } else {
+                pooledEstimates = ['Fixed', 'Random'];
+            }
+            
+            const height = (studies.length * 45) + (pooledEstimates.length * 55) + margin.top + margin.bottom;
+
+            const svg = d3.select('#forest-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Add plot title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -50)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '16px')
+                .attr('font-weight', 'bold')
+                .attr('fill', '#4a5568')
+                .text(forestTitle);
+
+            // Add heterogeneity statistics
+            if (currentStats.numStudies) {
+                svg.append('text')
+                    .attr('x', width / 2)
+                    .attr('y', -25)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('fill', '#666')
+                    .text(`I² = ${currentStats.I2.toFixed(1)}%, τ² = ${currentStats.tau2.toFixed(3)}, Q = ${currentStats.Q.toFixed(2)} (p = ${currentStats.pValueQ < 0.001 ? '<0.001' : currentStats.pValueQ.toFixed(3)})`);
+            }
+
+            // Calculate scale - ensure 1.0 is always visible
+            const allLogORs = studies.map(s => s.logOR).concat([pooledLogOR, randomPooledLogOR, 0]); // Add 0 for OR=1.0
+            const allLowers = studies.map(s => Math.log(s.ciLower)).concat([pooledLogOR - 1.96 * pooledSE, randomPooledLogOR - 1.96 * randomPooledSE]);
+            const allUppers = studies.map(s => Math.log(s.ciUpper)).concat([pooledLogOR + 1.96 * pooledSE, randomPooledLogOR + 1.96 * randomPooledSE]);
+            
+            const xExtent = d3.extent([...allLowers, ...allUppers, 0]); // Include 0 to ensure OR=1.0 is visible
+            const xScale = d3.scaleLinear()
+                .domain(xExtent)
+                .range([0, width]);
+
+            const yScale = d3.scaleBand()
+                .domain(studies.map((_, i) => i).concat(pooledEstimates))
+                .range([0, height - margin.bottom - margin.top])
+                .paddingInner(0.2)
+                .paddingOuter(0.1);
+
+            // Add reference line at OR = 1 (LogOR = 0) - ALWAYS VISIBLE
+            svg.append('line')
+                .attr('class', 'reference-line')
+                .attr('x1', xScale(0))
+                .attr('x2', xScale(0))
+                .attr('y1', 0)
+                .attr('y2', height - margin.bottom - margin.top);
+
+            // Add column headers
+            svg.append('text')
+                .attr('x', -10)
+                .attr('y', -5)
+                .attr('text-anchor', 'end')
+                .attr('font-size', '12px')
+                .attr('font-weight', 'bold')
+                .text('Study');
+
+            svg.append('text')
+                .attr('x', width + 10)
+                .attr('y', -5)
+                .attr('text-anchor', 'start')
+                .attr('font-size', '12px')
+                .attr('font-weight', 'bold')
+                .text('OR [95% CI]');
+
+            svg.append('text')
+                .attr('x', width + 120)
+                .attr('y', -5)
+                .attr('text-anchor', 'start')
+                .attr('font-size', '12px')
+                .attr('font-weight', 'bold')
+                .text('Weight (%)');
+
+            // Draw studies
+            studies.forEach((study, i) => {
+                const y = yScale(i) + yScale.bandwidth() / 2;
+                const x = xScale(study.logOR);
+                const x1 = xScale(Math.log(study.ciLower));
+                const x2 = xScale(Math.log(study.ciUpper));
+
+                // Confidence interval line
+                svg.append('line')
+                    .attr('x1', x1)
+                    .attr('x2', x2)
+                    .attr('y1', y)
+                    .attr('y2', y)
+                    .attr('stroke', '#666')
+                    .attr('stroke-width', 2);
+
+                // Study point
+                svg.append('rect')
+                    .attr('x', x - Math.sqrt(study.weight) / 2)
+                    .attr('y', y - Math.sqrt(study.weight) / 2)
+                    .attr('width', Math.sqrt(study.weight))
+                    .attr('height', Math.sqrt(study.weight))
+                    .attr('fill', '#4a90e2')
+                    .attr('stroke', '#357abd');
+
+                // Study label
+                svg.append('text')
+                    .attr('x', -10)
+                    .attr('y', y + 5)
+                    .attr('text-anchor', 'end')
+                    .attr('font-size', '12px')
+                    .text(study.name);
+
+                // OR and CI details
+                svg.append('text')
+                    .attr('x', width + 10)
+                    .attr('y', y + 5)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '11px')
+                    .text(`${study.or.toFixed(2)} [${study.ciLower.toFixed(2)}, ${study.ciUpper.toFixed(2)}]`);
+
+                // Weight
+                svg.append('text')
+                    .attr('x', width + 120)
+                    .attr('y', y + 5)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '11px')
+                    .text(`${study.weight.toFixed(1)}`);
+
+                // CI ends
+                svg.append('line')
+                    .attr('x1', x1)
+                    .attr('x2', x1)
+                    .attr('y1', y - 5)
+                    .attr('y2', y + 5)
+                    .attr('stroke', '#666')
+                    .attr('stroke-width', 2);
+
+                svg.append('line')
+                    .attr('x1', x2)
+                    .attr('x2', x2)
+                    .attr('y1', y - 5)
+                    .attr('y2', y + 5)
+                    .attr('stroke', '#666')
+                    .attr('stroke-width', 2);
+            });
+
+            // Draw pooled estimates
+            if (selectedModel === 'fixed' || selectedModel === 'both') {
+                const pooledY = yScale('Fixed') + yScale.bandwidth() / 2;
+                const fixedX = xScale(pooledLogOR);
+                const fixedX1 = xScale(pooledLogOR - 1.96 * pooledSE);
+                const fixedX2 = xScale(pooledLogOR + 1.96 * pooledSE);
+                const fixedOR = Math.exp(pooledLogOR);
+                const fixedCILower = Math.exp(pooledLogOR - 1.96 * pooledSE);
+                const fixedCIUpper = Math.exp(pooledLogOR + 1.96 * pooledSE);
+
+                svg.append('polygon')
+                    .attr('class', 'pooled-diamond')
+                    .attr('points', `${fixedX1},${pooledY} ${fixedX},${pooledY-8} ${fixedX2},${pooledY} ${fixedX},${pooledY+8}`);
+
+                svg.append('text')
+                    .attr('x', -10)
+                    .attr('y', pooledY + 5)
+                    .attr('text-anchor', 'end')
+                    .attr('font-size', '12px')
+                    .attr('font-weight', 'bold')
+                    .text('Fixed Effects');
+
+                svg.append('text')
+                    .attr('x', width + 10)
+                    .attr('y', pooledY + 5)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .text(`${fixedOR.toFixed(2)} [${fixedCILower.toFixed(2)}, ${fixedCIUpper.toFixed(2)}]`);
+
+                // Add p-value
+                svg.append('text')
+                    .attr('x', width + 10)
+                    .attr('y', pooledY + 18)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '10px')
+                    .attr('fill', '#666')
+                    .text(`p = ${currentStats.fixedPValue < 0.001 ? '<0.001' : currentStats.fixedPValue.toFixed(3)}`);
+
+                svg.append('text')
+                    .attr('x', width + 120)
+                    .attr('y', pooledY + 5)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .text('100.0');
+            }
+
+            if (selectedModel === 'random' || selectedModel === 'both') {
+                const randomY = yScale('Random') + yScale.bandwidth() / 2;
+                const randomX = xScale(randomPooledLogOR);
+                const randomX1 = xScale(randomPooledLogOR - 1.96 * randomPooledSE);
+                const randomX2 = xScale(randomPooledLogOR + 1.96 * randomPooledSE);
+                const randomOR = Math.exp(randomPooledLogOR);
+                const randomCILower = Math.exp(randomPooledLogOR - 1.96 * randomPooledSE);
+                const randomCIUpper = Math.exp(randomPooledLogOR + 1.96 * randomPooledSE);
+
+                svg.append('polygon')
+                    .attr('class', 'pooled-diamond')
+                    .attr('points', `${randomX1},${randomY} ${randomX},${randomY-8} ${randomX2},${randomY} ${randomX},${randomY+8}`)
+                    .attr('fill', '#e67e22');
+
+                svg.append('text')
+                    .attr('x', -10)
+                    .attr('y', randomY + 5)
+                    .attr('text-anchor', 'end')
+                    .attr('font-size', '12px')
+                    .attr('font-weight', 'bold')
+                    .text('Random Effects');
+
+                svg.append('text')
+                    .attr('x', width + 10)
+                    .attr('y', randomY + 5)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .text(`${randomOR.toFixed(2)} [${randomCILower.toFixed(2)}, ${randomCIUpper.toFixed(2)}]`);
+
+                // Add p-value
+                svg.append('text')
+                    .attr('x', width + 10)
+                    .attr('y', randomY + 18)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '10px')
+                    .attr('fill', '#666')
+                    .text(`p = ${currentStats.randomPValue < 0.001 ? '<0.001' : currentStats.randomPValue.toFixed(3)}`);
+
+                svg.append('text')
+                    .attr('x', width + 120)
+                    .attr('y', randomY + 5)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '11px')
+                    .attr('font-weight', 'bold')
+                    .text('100.0');
+            }
+
+            // X-axis
+            const xAxis = d3.axisBottom(xScale)
+                .tickFormat(d => Math.exp(d).toFixed(2));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height - margin.bottom - margin.top})`)
+                .call(xAxis);
+
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height - margin.bottom - margin.top + 35)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '14px')
+                .attr('font-weight', 'bold')
+                .text('Odds Ratio');
+
+            // Favours labels
+            const favoursY = height - margin.bottom - margin.top + 55;
+            
+            svg.append('text')
+                .attr('x', 20)
+                .attr('y', favoursY)
+                .attr('text-anchor', 'start')
+                .attr('font-size', '12px')
+                .attr('font-style', 'italic')
+                .attr('fill', '#666')
+                .text(favoursLeft);
+
+            svg.append('text')
+                .attr('x', width - 20)
+                .attr('y', favoursY)
+                .attr('text-anchor', 'end')
+                .attr('font-size', '12px')
+                .attr('font-style', 'italic')
+                .attr('fill', '#666')
+                .text(favoursRight);
+
+            // Add arrows for favours
+            svg.append('polygon')
+                .attr('points', `10,${favoursY-3} 15,${favoursY} 10,${favoursY+3}`)
+                .attr('fill', '#666');
+
+            svg.append('polygon')
+                .attr('points', `${width-10},${favoursY-3} ${width-15},${favoursY} ${width-10},${favoursY+3}`)
+                .attr('fill', '#666');
+        }
+
+        function createFunnelPlot() {
+            const container = document.getElementById('funnel-plot');
+            container.innerHTML = '';
+
+            const funnelTitle = document.getElementById('funnel-title').value || 'EasyMeta OR Web: Publication Bias Assessment';
+
+            const margin = {top: 80, right: 40, bottom: 80, left: 60};
+            const width = 600 - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+
+            const svg = d3.select('#funnel-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Add plot title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -50)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '16px')
+                .attr('font-weight', 'bold')
+                .attr('fill', '#4a5568')
+                .text(funnelTitle);
+
+            // Add study count
+            if (currentStats.numStudies) {
+                svg.append('text')
+                    .attr('x', width / 2)
+                    .attr('y', -25)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('fill', '#666')
+                    .text(`Studies: ${currentStats.numStudies}, I² = ${currentStats.I2.toFixed(1)}%`);
+            }
+
+            // Scales
+            const xExtent = d3.extent(studies, d => d.logOR);
+            const padding = (xExtent[1] - xExtent[0]) * 0.1;
+            const xScale = d3.scaleLinear()
+                .domain([xExtent[0] - padding, xExtent[1] + padding])
+                .range([0, width]);
+
+            const yExtent = d3.extent(studies, d => d.se);
+            const yScale = d3.scaleLinear()
+                .domain([0, yExtent[1] * 1.1])
+                .range([0, height]);
+
+            // Reference line at LogOR = 0
+            svg.append('line')
+                .attr('class', 'reference-line')
+                .attr('x1', xScale(0))
+                .attr('x2', xScale(0))
+                .attr('y1', 0)
+                .attr('y2', height);
+
+            // Plot points
+            svg.selectAll('.funnel-point')
+                .data(studies)
+                .enter()
+                .append('circle')
+                .attr('class', 'funnel-point')
+                .attr('cx', d => xScale(d.logOR))
+                .attr('cy', d => yScale(d.se))
+                .attr('r', 4)
+                .on('mouseover', function(event, d) {
+                    const tooltip = d3.select('body').append('div')
+                        .attr('class', 'tooltip')
+                        .style('opacity', 0)
+                        .style('position', 'absolute')
+                        .style('background', 'rgba(0, 0, 0, 0.8)')
+                        .style('color', 'white')
+                        .style('padding', '8px')
+                        .style('border-radius', '4px')
+                        .style('font-size', '12px')
+                        .style('pointer-events', 'none');
+
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    
+                    tooltip.html(`${d.name}<br/>OR: ${d.or.toFixed(3)}<br/>LogOR: ${d.logOR.toFixed(3)}<br/>SE: ${d.se.toFixed(3)}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.selectAll('.tooltip').remove();
+                });
+
+            // Axes
+            const xAxis = d3.axisBottom(xScale).tickFormat(d => d.toFixed(2));
+            const yAxis = d3.axisLeft(yScale).tickFormat(d => d.toFixed(3));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(xAxis);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(yAxis);
+
+            // Axis labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + 40)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '14px')
+                .attr('font-weight', 'bold')
+                .text('Log Odds Ratio');
+
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -height / 2)
+                .attr('y', -40)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '14px')
+                .attr('font-weight', 'bold')
+                .text('Standard Error');
+        }
+
+        // Download functionality
+        function downloadPlot(plotType, format) {
+            const plotId = plotType === 'forest' ? 'forest-plot' : 'funnel-plot';
+            const plotContainer = document.getElementById(plotId);
+            const svgElement = plotContainer.querySelector('svg');
+            
+            if (!svgElement) {
+                showMessage('No plot available to download. Please run the meta-analysis first.', 'error');
+                return;
+            }
+
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '');
+            const filename = `EasyMeta_OR_${plotType}_plot_${timestamp}`;
+
+            if (format === 'svg') {
+                downloadSVG(svgElement, filename);
+            } else if (format === 'png') {
+                downloadPNG(svgElement, filename);
+            }
+        }
+
+        function downloadSVG(svgElement, filename) {
+            try {
+                const svgClone = svgElement.cloneNode(true);
+                svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                svgClone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+                
+                const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const cssStyle = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+                cssStyle.textContent = `
+                    .axis { font-size: 12px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+                    .axis path, .axis line { fill: none; stroke: #666; shape-rendering: crispEdges; }
+                    .reference-line { stroke: #e53e3e; stroke-width: 2; stroke-dasharray: 5,5; }
+                    .pooled-diamond { fill: #38a169; stroke: #2f855a; stroke-width: 2; }
+                    .funnel-point { fill: #667eea; opacity: 0.7; }
+                    text { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+                `;
+                styleElement.appendChild(cssStyle);
+                svgClone.insertBefore(styleElement, svgClone.firstChild);
+
+                const svgString = new XMLSerializer().serializeToString(svgClone);
+                const blob = new Blob([svgString], { type: 'image/svg+xml' });
+                
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename + '.svg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showMessage(`SVG file downloaded: ${filename}.svg`, 'success');
+            } catch (error) {
+                showMessage('Error downloading SVG file', 'error');
+                console.error('SVG download error:', error);
+            }
+        }
+
+        function downloadPNG(svgElement, filename) {
+            try {
+                const svgClone = svgElement.cloneNode(true);
+                svgClone.style.backgroundColor = 'white';
+                svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                
+                const svgRect = svgElement.getBoundingClientRect();
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                const scale = 2;
+                canvas.width = svgRect.width * scale;
+                canvas.height = svgRect.height * scale;
+                
+                ctx.scale(scale, scale);
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const svgString = new XMLSerializer().serializeToString(svgClone);
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, svgRect.width, svgRect.height);
+                    
+                    canvas.toBlob(function(blob) {
+                        const pngUrl = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = pngUrl;
+                        link.download = filename + '.png';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(pngUrl);
+                        URL.revokeObjectURL(url);
+                        
+                        showMessage(`PNG file downloaded: ${filename}.png`, 'success');
+                    }, 'image/png');
+                };
+                
+                img.onerror = function() {
+                    URL.revokeObjectURL(url);
+                    showMessage('Error converting plot to PNG. Please try SVG format.', 'error');
+                };
+                
+                img.src = url;
+            } catch (error) {
+                showMessage('Error downloading PNG file', 'error');
+                console.error('PNG download error:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStudiesTable();
+            if (inputMode === 'crosstable') {
+                updateTotals();
+            }
+        });
+    </script>
+</body>
+</html>
